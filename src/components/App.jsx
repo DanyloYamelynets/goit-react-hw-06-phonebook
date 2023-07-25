@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import ContactForm from './ContactForm/ContactForm';
 import Filter from './Filter/Filter';
 import ContactList from './Contacts/ContactList';
@@ -8,22 +7,17 @@ import {
   PhonebookTitle,
   ContactsTitle,
 } from './Container/ContainerStyled';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact, deleteContact, setFilter } from 'redux/contactsSlice';
 
 export default function App() {
-  const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState('');
-
-  useEffect(() => {
-    const stringifiedContacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(stringifiedContacts) || [];
-    setContacts(parsedContacts);
-  }, []);
-
-  useEffect(() => {
-    if (!contacts.length) return;
-    const stringifiedContacts = JSON.stringify(contacts);
-    localStorage.setItem('contacts', stringifiedContacts);
-  }, [contacts]);
+  const contacts = useSelector(state => {
+    return state.contacts.contacts;
+  });
+  const filter = useSelector(state => {
+    return state.contacts.filter;
+  });
+  const dispatch = useDispatch();
 
   const onAddContact = contactData => {
     const { name } = contactData;
@@ -38,14 +32,14 @@ export default function App() {
         id: nanoid(),
         ...contactData,
       };
-      setContacts([contact, ...contacts]);
+      dispatch(addContact(contact));
     }
   };
   const onFilter = filterContacts => {
-    setFilter(filterContacts);
+    dispatch(setFilter(filterContacts));
   };
   const onDeleteContact = contactId => {
-    setContacts(contacts.filter(contact => contact.id !== contactId));
+    dispatch(deleteContact(contactId));
   };
 
   const filteredContacts = contacts.filter(contact =>
